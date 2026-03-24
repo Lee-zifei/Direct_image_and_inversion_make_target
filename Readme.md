@@ -19,10 +19,17 @@ This section covers the workflow for generating high-quality training labels usi
     * Run `make obs` to generate synthetic seismic records.
     * The pre-generated results are stored in `/forward_output/`. 
     * *Note: To use custom velocity models, please refer to the README in the folder for parameter settings.*
+    ![Workflow Description](ALL_PDF/Fig_marmousi_retraining__vel-1.png)![Workflow Description](ALL_PDF/Fig_marmousi_CNN_test_analyse__csgs3d-1.png)
+
 2.  **Seismic Processing & Blending:**
     * `process/`: Contains the workflow for standard single-source seismic processing.
     * `blend_and_process/`: Handles multi-source (blended) data generation and direct imaging. 
+    ![Workflow Description](ALL_PDF/Fig_marmousi_retraining__vp_rms_pad_smooth-1.png)
+    ![Workflow Description](ALL_PDF/Fig_marmousi_retraining__stack-1.png)
+    ![Workflow Description](ALL_PDF/Fig_marmousi_retraining__stack_kif-1.png)
     * **Execution:** Run `scons` in these directories to automatically load parameters and execute the full processing chain.
+
+    
 3.  **Label Preparation (`re_forward/`):**
     * The `input/` folder contains `other1.dat` (direct inversion modeling data) and time-to-depth conversion codes. 
     * Run `make obs` to generate seismic records from velocity models derived via direct imaging. These records serve as the **ground truth labels** for deep learning.
