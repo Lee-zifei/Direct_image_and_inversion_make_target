@@ -19,16 +19,16 @@ import sys, os, platform
 import numpy as np
 import os
 import sys, os, platform
-if 'macos' in platform.platform().lower(): 
-    myprog_path='/Users/lzf/Documents/cdut_zsh_group/python' 
-elif 'linux' in platform.platform().lower(): 
-    myprog_path='/media/lzf/Work/code/python' 
-    myprog_path_survey='/home/lzf/code/python' 
-else: 
-    myprog_path='L:\data\code\python' 
-sys.path.append(myprog_path)
-sys.path.append(myprog_path_survey)
-from subfunctions import *
+#  if 'macos' in platform.platform().lower():
+#      myprog_path='/Users/lzf/Documents/cdut_zsh_group/python'
+#  elif 'linux' in platform.platform().lower():
+#      myprog_path='/media/lzf/Work/code/python'
+#      myprog_path_survey='/home/lzf/code/python'
+#  else:
+#      myprog_path='L:\data\code\python'
+#  sys.path.append(myprog_path)
+#  sys.path.append(myprog_path_survey)
+#  from subfunctions import *
   
 ###########################################################################################
 def result (data,other):
