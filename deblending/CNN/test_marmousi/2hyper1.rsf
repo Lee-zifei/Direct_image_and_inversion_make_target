@@ -1,0 +1,11 @@
+4.2-git	sfbin2rsf	deblending/CNN/test_marmousi:	lzf@lzf	Tue Mar 24 17:21:47 2026
+
+	o1=0
+	d2=1
+	n2=330
+	o2=0
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Work/data/RSFDATA/data/deblending/CNN/test_marmousi/2hyper1.rsf@"
+	d1=0.004
+	n1=2000

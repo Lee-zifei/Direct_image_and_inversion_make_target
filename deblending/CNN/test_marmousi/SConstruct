@@ -49,8 +49,8 @@ for i in range (par['num']):
     spi3 = random.randint(130,150)
     spi4 = random.randint(180,200)
 
-    Flow(hyper,'../../../../seismic_data_processing/Forward/forward_output/%dsource_seismogram.bin'%(i+140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
-    Flow(hyper2,'../../../../seismic_data_processing/Forward/forward_output/%dsource_seismogram.bin'%(i+330-140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
+    Flow(hyper,'../../../Forward/forward_output/%dsource_seismogram.bin'%(i+140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
+    Flow(hyper2,'../../../Forward/forward_output/%dsource_seismogram.bin'%(i+330-140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
     seed  = random.randint(0, 100000)
     # Flow (hyper2, hyper, 'matlr')
     Flow (dither, hyper, 'dithercode amplitude=0.1 mean=100 period=5 mode=0 range=1000 |  dd type=int')
