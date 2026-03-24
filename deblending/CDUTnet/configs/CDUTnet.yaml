@@ -1,0 +1,37 @@
+GPU :  [0,1,2,3,5]
+DATA:
+  IMG_SIZE: 128
+  DATA_PATH: ./data/Marmousi_retraining/Train
+  TEST_PATH: ./data/Marmousi_retraining/Test
+TRAIN:
+  WARMUP_EPOCHS: 5
+  WARMUP_LR: 0.0001
+  WEIGHT_DECAY: 0.05
+  MIN_LR: 1.0e-08
+  BASE_LR: 0.0005
+  EPOCHS: 200
+  CLIP_GRAD: 10
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    NAME: cosine
+  OPTIMIZER:
+    BETAS:
+      - 0.9
+      - 0.9
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+MODEL:
+  TYPE: WUDT_STAnet
+  NAME: CDUTnet
+  DT:
+    WINDOW_SIZE: [1,1,1]
+  DT2:
+    EMBED_DIM: 64
+    DEPTHS: [3, 5, 6]
+    NUM_HEADS: [1, 2, 16]
+    NITER : [1, 1, 1]
+    STOKEN_SIZE : [8, 4, 1]
+  

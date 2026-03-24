@@ -1,0 +1,88 @@
+4.2-git	sfbin2rsf	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:34:57 2026
+
+	o1=0
+	d2=1
+	n2=330
+	o2=0
+	data_format="native_float"
+	esize=4
+	in="stdout"
+	d1=0.004
+	n1=2000
+	in="stdin"
+
+4.2-git	sfput	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:34:57 2026
+
+	data_format="native_float"
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/csg1.rsf@"
+	d1=0.001000
+	d2=20
+	o2=0
+4.2-git	sfmutter	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:34:57 2026
+
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/csg_cut1.rsf@"
+4.2-git	sfcat	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:09 2026
+
+	n2=108900
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/csgs.rsf@"
+4.2-git	sfsegyheader	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:12 2026
+
+	data_format="native_int"
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/tdata.rsf@"
+	n1=91
+4.2-git	sfintbin4	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:20 2026
+
+	d2=20
+	n2=330
+	d3=10
+	o2=0
+	n3=659
+	data_format="native_int"
+	d4=1
+	o3=0
+	n4=1
+	d5=1
+	o4=1
+	n5=1
+	o5=1
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/t3data.rsf@"
+4.2-git	sfwindow	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:33 2026
+
+	d2=20
+	n2=330
+	o1=0
+	d3=10
+	o2=0
+	n3=1
+	data_format="native_int"
+	o3=520
+	f3=52
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/head53.rsf@"
+	d1=0.001
+	n1=91
+4.2-git	sfwindow	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:33 2026
+
+	d2=0.001
+	n2=1
+	o1=0
+	o2=0.011
+	f1=11
+	data_format="native_int"
+	esize=4
+	in="stdout"
+	d1=20
+	n1=330
+	in="stdin"
+
+4.2-git	sfdd	direct_image_and_inversion_make_target/seismic_data_processing/process:	lzf@lzf	Tue Mar 24 14:35:33 2026
+
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Backup/All_Published_Code/python/2025_work/direct_image_and_inversion_make_target/seismic_data_processing/process/rsf_data/direct_image_and_inversion_make_target/seismic_data_processing/process/cdpoffset53.rsf@"

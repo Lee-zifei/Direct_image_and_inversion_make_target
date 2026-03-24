@@ -1,0 +1,96 @@
+from rsf.proj import*
+import time
+import random
+
+
+###################### display definition#######################
+def result (data,other):
+    Result (data,
+            '''
+            grey title=%s label1=Time unit1="s" label2=Trace unit2=""
+            color=g screenratio=1.2 wanttitle=n clip=0.01
+            %s
+            '''%(data,other))
+def result3 (data, other):
+    Result (data,
+            '''
+            byte clip=0.001 | grey3 frame1=100 frame2=25 frame3=35
+            title="" label1="Time" unit1="s" label2="X" unit2="km" label3="Y" unit3="km"
+            flat=n wantaxis=y wanttitle=n color=g point1=0.75 point2=0.74 screenratio=1.5
+            %s
+            '''%other)
+
+
+###################### display definition#######################
+par = {'nt': 2000, 'nx': 330, 'num': 1}
+
+hypers = []
+hypers2 = []
+obsers1 = []
+obsers2 = []
+for i in range (par['num']):
+    trace=20
+    # print (i)
+    hyper = '1hyper%d'%(i+1)
+    hyper2 = '2hyper%d'%(i+1)
+    
+    synt = 'synt%d'%(i+1)
+    apex = random.randint(par['nx']//5,par['nx']//2)
+    mask = 'mask%d'%(i+1)
+    obser1 = '1observe%d'%(i+1)
+    obser2 = '2observe%d'%(i+1)
+    dither = 'dither%d'%(i+1)
+    inv_dither = 'inv_dither%d'%(i+1)
+    temp =  'temp%d'%(i+1)
+    temp2 =  '2temp%d'%(i+1)
+
+    spi1 = random.randint(30,50)
+    spi2 = random.randint(80,100)
+    spi3 = random.randint(130,150)
+    spi4 = random.randint(180,200)
+
+    Flow(hyper,'../../../../seismic_data_processing/Forward/forward_output/%dsource_seismogram.bin'%(i+140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
+    Flow(hyper2,'../../../../seismic_data_processing/Forward/forward_output/%dsource_seismogram.bin'%(i+330-140),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
+    seed  = random.randint(0, 100000)
+    # Flow (hyper2, hyper, 'matlr')
+    Flow (dither, hyper, 'dithercode amplitude=0.1 mean=100 period=5 mode=0 range=1000 |  dd type=int')
+    Flow (inv_dither, dither, 'scale dscale=-1|dd type=int')
+    Flow (obser1, [hyper2, dither, hyper], 'dither shottime=${SOURCES[1]}| add scale=1,1 ${SOURCES[2]}')
+    # Flow (obser1, [hyper, dither], 'matlr| dither shottime=${SOURCES[1]}| add scale=1,1 ${SOURCES[0]}')
+    # Flow (inv_dither, dither, 'dd type=int|scale dscale=-1')
+    Flow (obser2, [hyper, inv_dither, hyper2], 'dither shottime=${SOURCES[1]}| add scale=1,1 ${SOURCES[2]}')
+    # Flow (temp, [obser1, inv_dither], 'dither shottime=${SOURCES[1]}')
+    # Flow (temp2, [obser2, temp], 'add scale=1,-1 ${SOURCES[1]}')
+    # result (temp2, '')
+    # Flow (obser, [hyper, hyper], 'noise mean=0 range=2 seed=%d| add scale=1,1 ${SOURCES[1]}'%seed)
+    hypers.append(hyper)
+    hypers2.append(hyper2)
+    obsers1.append(obser1)
+    obsers2.append(obser2)
+
+
+
+Flow ('hyper', hypers, 'cat axis=3 ${SOURCES[1:%d]}'%len(hypers))
+Flow ('hyper2', hypers2, 'cat axis=3 ${SOURCES[1:%d]}'%len(hypers))
+Flow ('obser', obsers1, 'cat axis=3 ${SOURCES[1:%d]}'%len(obsers1))
+Flow ('obser2', obsers2, 'cat axis=3 ${SOURCES[1:%d]}'%len(obsers2))
+
+Flow ('3dhyper', 'hyper', 'put n1=%(nt)d n2=%(nx)d n3=%(num)d'%par)
+Flow ('3dobser', 'obser', 'put n1=%(nt)d n2=%(nx)d n3=%(num)d'%par)
+Flow ('3dobser2', 'obser2', 'put n1=%(nt)d n2=%(nx)d n3=%(num)d'%par)
+
+result ('hyper', '')
+result ('obser', '')
+result ('obser2', '')
+
+Flow ('./data_test/dither.dat', dither, 'dd type=float| rsf2bin')
+Flow ('./data_test/hyper.dat', 'hyper', 'rsf2bin')
+Flow ('./data_test/hyper2.dat', 'hyper2', 'rsf2bin')
+Flow ('./data_test/obser.dat', 'obser', 'rsf2bin')
+Flow ('./data_test/obser2.dat', 'obser2', 'rsf2bin')
+
+
+
+
+
+End()

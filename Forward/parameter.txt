@@ -1,0 +1,46 @@
+--x grid number: nx 
+  663
+--z grid number: nz
+  234
+--PML numbers: pml
+  16
+--FD order: Lc
+  4
+--x grid interval (m): dx
+  10.0
+--z grid interval (m): dz
+  10.0
+--recording time: rectime-float//itmax-int//
+  2.0
+--time sample (s): dt
+  1.0e-3
+--Riker wavelet dominant frequency (Hz): f020
+  20.0
+--shot numbers: ns
+  330
+--the distance of the first shot at the left boundary (m): sx0
+  0.0
+--shot interval X (m): shotdx
+  20.0
+--the depth of shots (m): shotdep
+  10.0
+--receiver numbers: r_n = nx
+  330
+--the distance of the first receiver at the left boundary (m): rx0
+  0.0
+--receiver interval X (m): recdx
+  20.0
+--the depth of receivers (m): recdep
+  10.0
+---simultaneous source or not: simu
+  0
+---the distance between the two source (m): s_distance
+  1010.0
+---save the forward wavefiled 1 save other not save: save_wf
+  1
+---the time interval of saved wavefield: inter_wf
+  100
+--velocity filename: v_file
+  none
+--observed data filename: data_file  ----useless !!!!!
+  ./output/source_seismogram_rms_cut.bin

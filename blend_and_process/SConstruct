@@ -1,0 +1,427 @@
+#======================================================================================
+#    Copyright (C) 2024 Chengdu University of Technology.
+#    Copyright (C) 2024 Shaohuan Zu.
+# 
+#    Filename:     SConstruct
+#    Author：      Shaohuan Zu
+#    Institute：   Chengdu University of Technology
+#    Email：       zushaohuan19@cdut.edu.cn
+#    Date：        2024/08/29    20:23:09
+#    Function：    Seismic data processing 
+# 
+#    This program is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the Free
+#    Software Foundation, either version 3 of the License, or any later version.
+#===================================================================================
+import math 
+from rsf.proj import *
+import sys, os, platform
+import numpy as np
+import os
+import sys, os, platform
+if 'macos' in platform.platform().lower(): 
+    myprog_path='/Users/lzf/Documents/cdut_zsh_group/python' 
+elif 'linux' in platform.platform().lower(): 
+    myprog_path='/media/lzf/Work/code/python' 
+    myprog_path_survey='/home/lzf/code/python' 
+else: 
+    myprog_path='L:\data\code\python' 
+sys.path.append(myprog_path)
+sys.path.append(myprog_path_survey)
+from subfunctions import *
+  
+###########################################################################################
+def result (data,other):
+    Result (data,
+             '''
+             grey title=%s label1='Time' unit1='s' label2='Trace' unit2=''
+             color=g screenratio=1.5 wanttitle=n bar=y scalebar=n
+             %s 
+             '''%(data,other))
+def plot (data,other):
+    Plot (data,
+             '''
+             grey title=%s label1='Time' unit1='s' label2='Trace' unit2=''
+             color=g screenratio=0.2 wanttitle=n clip=3 bar=y scalebar=n
+             %s 
+             '''%(data,other))
+def result3 (data, other):
+     Result (data,
+            '''
+            byte bar=bar.rsf | grey3 %s
+            title='' label1='Time' unit1='s' label2='X' unit2='' label3='Y' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.64
+            '''%(other))
+def plot3 (data, other):
+     Plot (data,
+            '''
+            byte clip=3e+6 bar=bar.rsf %s| grey3 frame1=150 frame2=50 frame3=15
+            title='' label1='Time' unit1='s' label2='X' unit2='' label3='Y' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.64 screenratio=0.2 o1num=0 d1num=2 n1tic=3 
+            '''%(other))
+def wig (data, other):
+    Result (data,
+            '''
+            wiggle title=%s transp=y yreverse=y label1='Time' unit1='s' label2='Trace' unit2=''
+            screenratio=0.2
+            %s
+            '''%(data, other))
+def graph (data, other):
+    Result (data,
+            '''
+            graph title=%s label1='Frequency' unit1='Hz' label2='Amplitude' unit2='' screenratio=0.2
+            %s
+            '''%(data, other))
+
+def result4 (data, other):
+     Result (data,
+            '''
+            byte bar=bar.rsf %s| grey3 frame1=1000 frame2=280 frame3=380
+            title='' label1='Time' unit1='s' label2='Shot domain' unit2='' label3='Receiver domain' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.44 screenratio=1.2
+            '''%(other))
+def result5 (data, other):
+     Result (data,
+            '''
+            byte clip=1e-2 bar=bar.rsf %s| grey3 frame1=1000 frame2=350 frame3=190
+            title='' label1='Time' unit1='s' label2='Shot domain' unit2='' label3='Offset domain' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.44
+            screenratio=0.2
+            '''%(other))
+# ===================================================================================
+#  # Read survey parameter from parameter.txt
+# ===================================================================================
+
+with open('../Forward/parameter.txt','r') as file:
+    lines = file.readlines()
+parameter = {
+        'nx':int(lines[1]), # 读取速度模型长度
+        'nz':int(lines[3]), # 读取速度模型深度
+        'pml':int(lines[5]), # 读取吸收边界层数
+        'Lc':int(lines[7]),  # 读取差分阶数 
+        'dx':float(lines[9]), # 读取速度模型横向间隔
+        'dz':float(lines[11]), # 读取速度模型纵向间隔
+        'itmax':float(lines[13]), # 读取最大时间
+        'dt':float(lines[15]), # 读取时间间隔
+        'f0':float(lines[17]), # 读取子波主频
+        'ns':int(lines[19]), # 读取炮点数
+        'sx0':float(lines[21]), # 读取炮点起始位置
+        'shotdx':float(lines[23]), # 读取炮点间隔
+        'shotdep':float(lines[25]), # 读取炮点深度
+        'r_n':int(lines[27]), # 读取检波点数
+        'rx0':float(lines[29]), # 读取检波点起始位置
+        'recdx':float(lines[31]), # 读取检波点间隔
+        'recdep':float(lines[33]), # 读取检波点深度
+        'simu':int(lines[35]),  # 是否是多震源系统
+        's_distance':float(lines[37]), # 多震源系统震源间距
+        'save_wf':int(lines[39]), # 是否保存波场快照
+        'inter_wf':int(lines[41]), # 波场快照间隔
+        'v_file':str(lines[43][2:-1]), # 读取速度模型文件
+        'data_file':str(lines[45][2:-1]), # 读取数据文件
+        }
+# 计算偏移距间隔  炮间距或检波点间距中的最小值 
+parameter['offsetdx'] = min(parameter['shotdx'],parameter['recdx']) 
+# 计算CDP间隔    炮间距或检波点间隔的一半
+parameter['cdpdx'] = min(parameter['shotdx'],parameter['recdx'])/2
+prx = np.arange(parameter['rx0'], parameter['r_n']*parameter['recdx']+parameter['rx0'], parameter['recdx'])
+prxs = np.tile(prx, parameter['ns'])
+psx = np.arange(parameter['sx0'], parameter['ns']*parameter['shotdx']+parameter['sx0'], parameter['shotdx'])
+psxs = np.repeat(psx, parameter['r_n'], axis=0)
+pcdpxs = (prxs+psxs)/2
+ncdp = len(np.unique(pcdpxs))
+
+
+# ===================================================================================
+# Generate seismic survey according to parameter.txt
+# ===================================================================================
+sxs = []
+rxs = []
+# 计算道头中炮点和检波点的坐标 
+# sx 维度 748 X 1
+# rx 维度 1   X 760
+Flow ('rx',None, 'spike n1=1 n2=%d put d2=1|math output="x2*%d+%d"'%(parameter['r_n'],parameter['recdx'],parameter['rx0']))
+Flow ('cross', None, 'spike n1=1 n2=%d|put d2=1|math "output=1"'%parameter['r_n'])
+Flow ('sx', None, 'spike n1=1 n2=%d|put d2=1|math "output=x2*%d+%d"|transp'%(parameter['ns'],parameter['shotdx'],parameter['sx0']))
+for i in range (parameter['r_n']):
+    sxs.append('sx')
+for i in range (parameter['ns']):
+    rxs.append('rx')
+# 炮点排列形式      1 1 1 1 1 2 2 2 2 2 3 3 3 3 3
+# 检波点排列形式    1 2 3 1 2 3 1 2 3 1 2 3 1 2 3
+Flow ('sxs', sxs, 'cat axis=2 ${SOURCES[1:%d]}|transp|put n1=1 n2=%d d2=1|dd type=int'%(len(sxs),parameter['r_n']*parameter['ns']))
+Flow ('rxs', rxs, 'cat axis=2 ${SOURCES[1:%d]}|put d1=1 d2=1|dd type=int'%len(rxs))
+# inlines 和 xlines 均设置为1，主要是使用道头进行分选时 intbin4 需要4个维度信息
+Flow ('inlines', None, 'spike n1=1 n2=%d|put d2=1|math output="1"|dd type=int' %(parameter['r_n']*parameter['ns']))
+Flow ('xlines', None, 'spike n1=1 n2=%d|put d2=1|math output="1"| dd type=int' %(parameter['r_n']*parameter['ns']))
+# 偏移距等于炮点坐标减去建波点坐标
+Flow ('offsets', 'sxs rxs', 'add scale=1,-1 ${SOURCES[1]}|dd type=int')
+# 由于道头信息都是整数，所以需要将道头信息转换为浮点型进行操作
+Flow ('fsxs', 'sxs', 'dd type=float')
+Flow ('frxs', 'rxs', 'dd type=float')
+# 计算共深度点或共中心点
+Flow ('cdpxs', 'fsxs frxs', 'math in1=${SOURCES[1]} output="(in+in1)/2"|dd type=int')
+
+
+# ===================================================================================
+#  Generate blended data 
+# ===================================================================================
+# 设置延迟激发的时间编码对地震数据进行延迟
+scale = 500
+Flow ('crgsize_2d',None,'spike n1=%d n2=%d|put d1=1 d2=1'%(parameter['itmax']/parameter['dt'],parameter['r_n']))
+Flow ('dither_code','crgsize_2d','dithercode amplitude=0.12 period=500 mean=10 mode=0 range=%d | dd type=int'%(scale))
+Flow ('dither_code_2d','dither_code','spray axis=2 n=%d |put n1=1 n2=%d n3=%d | transp plane=23'%(parameter['ns'],parameter['r_n'],parameter['ns']))
+
+#  result ('dither_code_2d','')
+# ===================================================================================
+#  Read common shot gathers generated from Forward_RTM
+# ===================================================================================
+#读取二进制地震数据并设置对于的物理信息，如炮间距、道间距、采样间隔等
+path = '../Forward/forward_output/'
+csgs=[]
+csgs_cut=[]
+csgs_ble=[]
+for i in range (parameter['ns']):
+    csg = 'csg%d'%(i+1)
+    csg1 = 'csg1_%d'%(i+1)
+    csg_ble = 'csg_ble%d'%(i+1)
+    csg_cut = 'csg_cut%d'%(i+1)
+    temp  = 'temp%d'%(i+1)
+    csg_dir = 'csg_dir%d'%(i+1)
+    dithering = 'dither_1d%d'%(i+1)
+    ini = 'ini%d'%(i+1)
+    Flow (csg,path+'%dsource_seismogram.bin'%(i+1),'bin2rsf n1=%d n2=%d|put d1=%f d2=%d o2=%d'%(parameter['itmax']/parameter['dt'],parameter['r_n'],parameter['dt'],parameter['recdx'],parameter['rx0']))
+    Flow (csg1,path+'%dsource_seismogram.bin'%(parameter['ns']-i),'bin2rsf n1=%d n2=%d|put d1=%f d2=%d o2=%d'%(parameter['itmax']/parameter['dt'],parameter['r_n'],parameter['dt'],parameter['recdx'],parameter['rx0']))
+    # Flow (csg1,csg,'reverse which=2')
+    Flow (dithering,'dither_code_2d','window n2=1 f2=%d '%(i))
+    Flow (ini,[csg1,dithering],'dither shottime=${SOURCES[1]} ')
+    Flow (csg_ble,[csg,ini],'add scale=1,1 ${SOURCES[1]}  ')
+    Flow (csg_cut, csg_ble, 'mutter x0=%d v0=%d t0=0.09'%(int(i*parameter['shotdx']+parameter['sx0']),1500*int(parameter['recdx']/parameter['dx'])))
+    # Flow (csg_dir, [csg,csg_cut], 'add scale=1,-1 ${SOURCES[1]}')
+    #  result (csg_ble ,'clip=1e-2')
+    # result (csg_cut ,'clip=1e-2')
+    # result (csg_dir ,'clip=1e-2')
+    #  csgs.append(csg)
+    csgs_cut.append(csg_cut)
+    csgs_ble.append(csg_ble)
+Flow ('csgs', csgs_cut, 'cat axis=2 ${SOURCES[1:%d]}'%len(csgs_cut))
+Flow ('csgs_ble', csgs_ble, 'cat axis=2 ${SOURCES[1:%d]}'%len(csgs_ble))
+Flow ('csgs_ble.dat','csgs_ble','rsf2bin')
+# 利用计算的炮点、检波点、偏移距、inline、xline和共深度点信息制作segy道头
+Flow ('tdata', 'csgs sxs rxs offsets inlines xlines cdpxs',
+    '''
+    segyheader sx=${SOURCES[1]} gx=${SOURCES[2]} offset=${SOURCES[3]}
+    iline=${SOURCES[4]} xline=${SOURCES[5]} cdpx=${SOURCES[6]}
+    ''')
+
+# 使用炮点和共中心点信息对地震数据进行分选，选择关键字时要设置对应的采样间隔，其中ykey维度在三维显示正对观测者, xkey维度在三维显示的侧面
+Flow ('3ddata', 'csgs tdata', 'intbin4 head=${SOURCES[1]} xkey=21 dx=%d ykey=71 dy=%d rkey=73 dr=1 skey=74 ds=1'%(parameter['shotdx'], parameter['cdpdx'] ) )
+Flow ('t3data', 'tdata tdata', 'intbin4 head=${SOURCES[1]} xkey=21 dx=%d ykey=71 dy=%d rkey=73 dr=1 skey=74 ds=1'%(parameter['shotdx'],parameter['cdpdx']) )
+# 使用炮点和检波点信息对地震数据进行分选
+# Flow ('3ddata1', 'csgs tdata', 'intbin4 head=${SOURCE0S[1]} xkey=23 dx=%d ykey=21 dy=%d rkey=73 dr=1 skey=74 ds=1'%(parameter['recdx'],parameter['shotdx']))
+# 使用偏移距和炮点信息对地震数据进行分选
+# Flow ('3ddata2', 'csgs tdata', 'intbin4 head=${SOURCES[1]} xkey=11 dx=%d ykey=23 dy=%d rkey=73 dr=1 skey=74 ds=1'%(parameter['offsetdx'], parameter['recdx']))
+# result4 ('3ddata', 'clip=1e-3')
+# result3 ('3ddata1', 'clip=1e-3 frame1=1 frame2=1')
+# result5 ('3ddata2', '')
+
+Flow ('3ddata_ble', 'csgs_ble tdata', 'intbin4 head=${SOURCES[1]} xkey=23 dx=%d ykey=21 dy=%d rkey=73 dr=1 skey=74 ds=1'%(parameter['recdx'],parameter['shotdx']) )
+result4 ('3ddata_ble', 'clip=1e-3')
+# #===================================================================================
+# #  sort data into CDP or CMP
+# #===================================================================================
+# 计算数据的维度信息，保存到txt文本，以便后续读取
+# Flow ('ndim.txt', '3ddata', 'filedims parform=y')
+#
+# if os.path.exists('ndim.txt'):
+#     with open('ndim.txt','r') as file:
+#         lines = file.readlines()
+#         ndims = int(lines[0].split('=')[1])
+#         n1 = int(lines[1].split('=')[1].split(',')[0])
+#         n2 = int(lines[1].split(',')[1])
+#         ncdp = int(lines[1].split(',')[2])
+# else:
+#     ncdp=100
+# # print (ndims)
+
+v0       = 1500
+nv       = 201
+dv       = 20
+vp_picks = []
+mucdps   = []
+heads    = []
+
+
+# 由于分选的CDP道集中有效道数不同，CMP号起和结束时道数非常少，因此设置CMP起始和终止点，避免道数不足导致速度谱不准
+beg1     = 20
+# jump1主要是为了计算速度谱时的速度谱间隔，减少计算量
+jump1    = 1
+for i in range (ncdp//2,ncdp//2+1):
+    mucdp     = 'mucdp%d'%(i+1)
+    rms       = 'rms_%d'%(i+1)
+    cdpoffset = 'cdpoffset%d'%(i+1)
+    vsvel     = 'vsvel%d'%(i+1)
+    vp_pick   = 'vp_pick%d'%(i+1)
+    head      = 'head%d'%(i+1)
+    #  从三维道头矩阵中读取对应的CDP数据的道头信息
+    Flow (head,'t3data','window f3=%d n3=1'%i)
+    # 提取对应的偏移剧信息
+    Flow (cdpoffset, head, 'window f1=11 n1=1|dd type=float')
+    # 读取对应的CMP数据，并将直达波切除， 其中切除的x0、v0和t0需要根据实际情况进行调整
+    Flow (mucdp, '3ddata', 'window f3=%d n3=1'%i)
+    # Flow (mucdp+'.dat', mucdp, 'dd type=float |rsf2bin')
+    # result (mucdp, 'clip=1.5e-3')
+    # 对切除直达波的CDP数据计算速度谱
+    # result (mucdp, 'clip=1.5e-2')
+    # Flow (vsvel, [mucdp, cdpoffset], 'vscan semblance=y half=n v0=%d nv=%d dv=%d offset=${SOURCES[1]}'%(v0,nv,dv))
+    Flow (vsvel, [mucdp, cdpoffset],
+        '''
+        agc|
+        vscan half=n v0=%d nv=%d dv=%d nb=5 type=sembl  str=0.1 offset=${SOURCES[1]}|
+        smooth rect1=3 rect2=3|
+        mutter x0=0 t0=-1 v0=4000 inner=n|
+        mutter x0=0 t0=-1 v0=1500 inner=y|
+        smooth rect1=3 rect2=3
+        '''%(v0,nv,dv))
+    Plot(vsvel, 'put o2=1 d2=0.01|grey color=j allpos=y title="" unit2="km/s" screenratio=1.8 label="Times(s)"')
+    # 从速度谱中提取速度谱最大值对应的速度值
+    Flow (vp_pick, vsvel, 'pick rect1=25')
+    Plot (vp_pick, 'graph yreverse=y transp=y plotcol=7 plotfat=7 pad=n min2=%d max2=%d wantaxis=n wanttitle=n screenratio=1.8'%(v0,v0+nv*dv))
+    if i == ncdp//2:
+        Result ('pick_vel%d'%(i+1),[vsvel,vp_pick],'Overlay')
+        Flow ('./output/vsvel%d.dat'%(i+1),'vsvel%d'%(i+1),'rsf2bin')
+        Flow ('./output/vp_pick%d.dat'%(i+1),'vp_pick%d'%(i+1),'rsf2bin')
+        result ('mucdp%d'%(i+1),'')
+        Flow ('./output/mucdp%d.dat'%(i+1), mucdp, 'rsf2bin')
+    vp_picks.append(vp_pick)
+    mucdps.append(mucdp)
+    heads.append(head)
+    
+
+# # 将计算的一维速度谱信息合并成二维速度谱，主要是当jump1大于1时，需要将速度谱信息合并成二维速度谱
+# Flow ('vp_rms',vp_picks,'cat axis=2 ${SOURCES[1:%d]}'%(len(vp_picks)))
+# # 显示二维速度谱的速度谱信息
+# # result ('vp_rms', 'color=j clip=3000 bias=1900 screenratio=0.5 label2="CDP" ')
+# # 当jump1大于1时，则计算的速度谱的间隔是 jump1*parameter['cdpdx']，因此需要将速度谱的间隔调整为parameter['cdpdx']
+# # index1 等于1 ，主要是为了数据分选构建道头信息
+# Flow ('index1', 'vp_rms', 'window n1=1|math "output=1"|dd type=int')
+# Flow ('index2', '3ddata', 'window n1=1 f2=1 n2=1|math output="x1"|window f1=%d n1=%d j1=%d|dd type=int'%(beg1,len(range(beg1,ncdp-beg1,jump1)),jump1))
+
+# # 根据抽取的CDP道集信息构建道头
+# Flow ('headss', 'vp_rms index1 index1 index1 index1 index1 index2',
+#    '''
+#    segyheader sx=${SOURCES[1]} gx=${SOURCES[2]} offset=${SOURCES[3]}
+#    iline=${SOURCES[4]} xline=${SOURCES[5]} cdpx=${SOURCES[6]}
+#    ''')
+# # 利用构建的道头信息对速度谱进行分选，目的是当jump1大于1时，将计算的速度谱放置在正确的位置上
+# Flow ('vp_rms_pad', 'vp_rms headss', 'intbin4 head=${SOURCES[1]} xkey=71 dx=%d  ykey=21 dy=1 rkey=73 dr=1 skey=74 ds=1'%(parameter['cdpdx']))
+# # result ('vp_rms_pad', 'color=j clip=3000 bias=1900 screenratio=0.5 label2="CDP" ')
+
+# # 当jump1大于1时，利用已有速度谱值复制到相邻道集上 假设有速度谱的道号是 5  10  15
+# # 则将数据复制为5份，将原位置的速度谱复制到1 6 11， 2 7 12， 3 8 13， 4 9 14上， 然后将5组数据进行叠加
+# vps = []
+# for i in range (jump1):
+#    vp= 'vp_%d'%i
+#    Flow (vp, 'vp_rms_pad', 'cp|window f2=%i |pad end2=%d'%(i,i))
+#    vps.append(vp)
+# Flow ('vps', vps, 'cat axis=3 ${SOURCES[1:%d]}'%len(vps))
+# # 得到复制后的速度谱
+# Flow ('vp_rms_pad1', 'vps', 'stack axis=3')
+
+# # result ('vp_rms_pad1', 'color=j clip=3000 bias=1900 screenratio=0.5 label2="CDP" ')
+# # 将复制道集后的速度谱进行平滑处理
+# Flow ('vp_rms_pad_smooth', 'vp_rms_pad1', 'smooth rect2=25 repeat=3')#
+# result ('vp_rms_pad_smooth', 'color=j clip=3000 bias=1900 screenratio=0.5 label2="CDP" ')
+# # # # # ===================================================================================
+# # # # # ========6 Applied NMO to CDP data with smoothed velocity===========================
+# # # # # ========7 Mued NMO strecthing larger 0.5 ===========================================
+# # # # # ===================================================================================
+# # Flow ('vp_dim.txt', 'vp_rms_pad_smooth', 'filedims parform=y')
+# # # if os.path.exists('vp_dim.txt'):
+# # #     with open('vp_dim.txt','r') as file:
+# # #         lines = file.readlines()
+# # #         ndims = int(lines[0].split('=')[1])
+# # #         n22 = int(lines[1].split(',')[1])
+# # # else:
+# # #     n22=10
+# nmos = []
+# pre_stacks = []
+# cdpoffsets = []
+# for i in range (beg1,ncdp-beg1-jump1+1):
+#     cdpoffsett = 'cdpoffsett%d'%(i+1)
+#     mucdpp = 'mucdpp%d'%(i+1)
+#     rms = 'vp_rms_smooth_%d'%(i+1)
+#     nmo = 'nmo%d'%(i+1)
+#     pre_stack = 'pre_stack%d'%(i+1)
+#     #  从三维道头矩阵中读取对应的CDP数据的道头信息
+#     # 提取对应的偏移剧信息
+#     Flow (cdpoffsett, 't3data', 'window  f1=11 n1=1 f3=%d n3=1|dd type=float'%i)
+#     # 读取对应的CMP数据，并将直达波切除， 其中切除的x0、v0和t0需要根据实际情况进行调整
+#     Flow (mucdpp, '3ddata', 'window f3=%d n3=1'%(i))
+#     # 从平滑后的二维速度谱中抽取对应的一维速度谱值 ，由于二维速度谱的n2 小于CDP道集数量，因此此时是i-beg1
+#     Flow (rms, 'vp_rms_pad_smooth', 'window f2=%d n2=1|put d2=10'%(i-beg1))
+#     # 利用一维速度谱对CDP数据进行NMO处理
+#     # Flow (nmo, [mucdpp, cdpoffsett, rms], 'nmo offset=${SOURCES[1]} velocity=${SOURCES[2]} half=n str=0.3|mutter x0=%d v0=2000 t0=0.05'%(parameter['sx0']/2+i*parameter['cdpdx']))
+    
+#     Flow (nmo, [mucdpp, cdpoffsett, rms], 'nmo offset=${SOURCES[1]} velocity=${SOURCES[2]} half=n str=0.7|mutter x0=%d v0=2000 t0=0.1'%(parameter['sx0']/2+i*parameter['cdpdx']))
+#     if i == ncdp//2:
+#         result (nmo,'')
+#         Flow ('./output/nmo%d.dat'%(i+1),nmo,'rsf2bin')
+#    # result (mucdpp,'')
+
+#     nmos.append(nmo)
+#     cdpoffsets.append(cdpoffsett)
+#     # pre_stacks.append(pre_stack)
+# # 得到的NMO道集是按照CDP号进行排列的
+# Flow ('nmos', nmos, 'cat axis=3 ${SOURCES[1:%d]}'%len(nmos))
+# Flow ('cdpoffsets', cdpoffsets, 'cat axis=3 ${SOURCES[1:%d]}'%len(cdpoffsets))
+# result3 ('nmos', 'frame1=1500 frame2=150 frame3=200')
+# # result3 ('pre_stacks', 'frame1=1500 frame2=150 frame3=200')
+
+# # # # ===================================================================================
+# # # # =========8.1 Apply Kichhoff 2D pre-stack least-squares time migration============================
+# # # # ===================================================================================
+# Flow ('pre_cdpoffsets', 'cdpoffsets', 'transp plane=23')
+
+# Flow('pre_stack_migrant',
+#     ['nmos', 'vp_rms_pad_smooth', 'pre_cdpoffsets'],
+#     '''
+#     tkirmig vel=${SOURCES[1]} offset=${SOURCES[2]} adj=y amp=y half=y verb=y
+#     apt=50 ompchunk=1 ompnth=4
+#     ''')
+# # # # ===================================================================================
+# # # # =========8 Stack along offset to obtain stacked profile============================
+# # # # ===================================================================================
+# #将NMO道集按照偏移距进行叠加
+# Flow ('stack', 'nmos', 'stack axis=2 norm=n')
+# result ('stack','pclip=95 screenratio=1 label2="CDP"')
+
+# Flow ('pre_stack_migrantion', 'pre_stack_migrant', 'stack axis=2 norm=n')
+# result ('pre_stack_migrantion','pclip=95 screenratio=1 label2="CDP"')
+
+# #
+# # # ===================================================================================
+# # # ========9 Apply Kichhoff 2D post-stack least-squares time migration================
+# # # ===================================================================================
+# #叠后克希霍夫积分偏移处理
+# Flow ('stack_kif', 'stack vp_rms_pad_smooth',
+#      '''kirchinvs velocity=${SOURCES[1]}  niter=1 liter=3 ps=1 verb=1''')
+# result ('stack_kif','pclip=95  screenratio=1 label2="CDP"')
+# # #
+# ##===================================================================================
+# # # ========10 Save all process data================
+# # # ===================================================================================
+
+# Flow ('./output/stack.dat', 'stack ','rsf2bin')
+# Flow ('./output/stack_kif.dat', 'stack_kif ','rsf2bin')
+# Flow ('./output/pre_stack_migrant.dat', 'pre_stack_migrant ','rsf2bin')
+# Flow ('./output/vp_rms_pad_smooth.dat', 'vp_rms_pad_smooth ','rsf2bin')
+# Flow ('./output/dither_code_2d.dat','dither_code_2d','rsf2bin')
+# # Result('Fig',['./Fig/stack.vpl','./Fig/stack_kif.vpl'],'OverUnderAniso')
+
+
+# # # # ===================================================================================
+# # # # =========11 Apply Kichhoff 2D pre-stack least-squares time migration============================
+# # # # ===================================================================================
+
+
+End ()

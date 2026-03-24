@@ -1,0 +1,35 @@
+[32m[2025-04-29 16:20:16 WUDTnet_cosl][33m(main_training.py 85)[39m: INFO number of params: 4419461
+All checkpoints founded in output/WUDTnet_cosl/default: ['ckpt_epoch_199.pth']
+The latest checkpoint founded: output/WUDTnet_cosl/default/ckpt_epoch_199.pth
+[32m[2025-04-29 16:20:16 WUDTnet_cosl][33m(main_training.py 98)[39m: INFO auto resuming from output/WUDTnet_cosl/default/ckpt_epoch_199.pth
+[32m[2025-04-29 16:20:16 WUDTnet_cosl][33m(utils.py 21)[39m: INFO ==============> Resuming form output/WUDTnet_cosl/default/ckpt_epoch_199.pth....................
+Traceback (most recent call last):
+  File "main_training.py", line 264, in <module>
+    main(config,pretrain)
+  File "main_training.py", line 102, in main
+    max_accuracy, min_loss = load_checkpoint(config, model_without_ddp, optimizer, lr_scheduler, logger)
+  File "/data/data1/lzf/code/python/2025_work/cosl_deblending/utils.py", line 27, in load_checkpoint
+    msg = model.load_state_dict(checkpoint['model'], strict=False)
+  File "/home/lzf/.conda/envs/WUDT/lib/python3.6/site-packages/torch/nn/modules/module.py", line 1483, in load_state_dict
+    self.__class__.__name__, "\n\t".join(error_msgs)))
+RuntimeError: Error(s) in loading state_dict for WUDTnet:
+	size mismatch for decorder1.0.blocks.0.attn.relative_position_bias_table: copying a param with shape torch.Size([127, 4]) from checkpoint, the shape in current model is torch.Size([1023, 3]).
+	size mismatch for decorder1.0.blocks.0.attn.relative_position_index: copying a param with shape torch.Size([64, 64]) from checkpoint, the shape in current model is torch.Size([512, 512]).
+	size mismatch for decorder1.0.blocks.1.attn.relative_position_bias_table: copying a param with shape torch.Size([127, 4]) from checkpoint, the shape in current model is torch.Size([1023, 3]).
+	size mismatch for decorder1.0.blocks.1.attn.relative_position_index: copying a param with shape torch.Size([64, 64]) from checkpoint, the shape in current model is torch.Size([512, 512]).
+	size mismatch for decorder2.0.blocks.0.attn.relative_position_bias_table: copying a param with shape torch.Size([63, 8]) from checkpoint, the shape in current model is torch.Size([511, 6]).
+	size mismatch for decorder2.0.blocks.0.attn.relative_position_index: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([256, 256]).
+	size mismatch for decorder2.0.blocks.1.attn.relative_position_bias_table: copying a param with shape torch.Size([63, 8]) from checkpoint, the shape in current model is torch.Size([511, 6]).
+	size mismatch for decorder2.0.blocks.1.attn.relative_position_index: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([256, 256]).
+	size mismatch for center.0.blocks.0.attn.relative_position_bias_table: copying a param with shape torch.Size([31, 16]) from checkpoint, the shape in current model is torch.Size([255, 12]).
+	size mismatch for center.0.blocks.0.attn.relative_position_index: copying a param with shape torch.Size([16, 16]) from checkpoint, the shape in current model is torch.Size([128, 128]).
+	size mismatch for center.0.blocks.1.attn.relative_position_bias_table: copying a param with shape torch.Size([31, 16]) from checkpoint, the shape in current model is torch.Size([255, 12]).
+	size mismatch for center.0.blocks.1.attn.relative_position_index: copying a param with shape torch.Size([16, 16]) from checkpoint, the shape in current model is torch.Size([128, 128]).
+	size mismatch for encoder2.0.blocks.0.attn.relative_position_bias_table: copying a param with shape torch.Size([63, 8]) from checkpoint, the shape in current model is torch.Size([511, 6]).
+	size mismatch for encoder2.0.blocks.0.attn.relative_position_index: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([256, 256]).
+	size mismatch for encoder2.0.blocks.1.attn.relative_position_bias_table: copying a param with shape torch.Size([63, 8]) from checkpoint, the shape in current model is torch.Size([511, 6]).
+	size mismatch for encoder2.0.blocks.1.attn.relative_position_index: copying a param with shape torch.Size([32, 32]) from checkpoint, the shape in current model is torch.Size([256, 256]).
+	size mismatch for encoder1.0.blocks.0.attn.relative_position_bias_table: copying a param with shape torch.Size([127, 4]) from checkpoint, the shape in current model is torch.Size([1023, 3]).
+	size mismatch for encoder1.0.blocks.0.attn.relative_position_index: copying a param with shape torch.Size([64, 64]) from checkpoint, the shape in current model is torch.Size([512, 512]).
+	size mismatch for encoder1.0.blocks.1.attn.relative_position_bias_table: copying a param with shape torch.Size([127, 4]) from checkpoint, the shape in current model is torch.Size([1023, 3]).
+	size mismatch for encoder1.0.blocks.1.attn.relative_position_index: copying a param with shape torch.Size([64, 64]) from checkpoint, the shape in current model is torch.Size([512, 512]).

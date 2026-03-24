@@ -1,0 +1,140 @@
+#================================================================
+#    Copyright (C) 2019 Chengdu University of Technology.
+#    Copyright (C) 2019 Shaohuan Zu.
+#
+#    Filename:     ztest.py
+#    Author：      Shaohuan Zu
+#    Institute：   Chengdu University of Technology
+#    Email：       zushaohuan19@cdut.edu.cn
+#    Date：        2019/11/25    15:45:29
+#    Function：
+#
+#    This program is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the Free
+#    Software Foundation, either version 3 of the License, or any later version.
+#================================================================
+
+import keras
+from keras.models import Sequential, load_model, Model
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
+from keras import backend
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import io
+import numpy as np
+from myprog import *
+import keras.backend.tensorflow_backend as KTF #
+import warnings
+import argparse
+import os
+from pynvml import *
+import tensorflow as tf
+
+
+########################obtain parameters#################################
+parser = argparse.ArgumentParser(description='read parameters')
+parser.add_argument ('--model', default=None, type=int, help='Choose model')
+args = parser.parse_args()
+kk = args.model
+
+
+########################set gpu information#################################
+
+nvmlInit()
+GpuCount = nvmlDeviceGetCount()
+os.environ["CUDA_VISIBLE_DEVICES"] = "%d"%((kk-1)%GpuCount)
+
+
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.8
+gpu_options = tf.GPUOptions(allow_growth=True)
+session = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+KTF.set_session(session )
+
+########################set data parameters ###############################
+batch_size = 100       #batch size for training in each step
+n1=256;                 # the training volumn size   nz
+n2=128;                # the training volumn sie    nt
+patch_rows = 32        # patch size
+patch_cols= 32         # patch size
+tslide=4               # time stride
+xslide=4              # space stride
+
+
+
+
+filename1 = 'hyper.dat'
+hyper = np.fromfile(filename1, dtype='float32')
+hyper = hyper.reshape(n2,n1).T
+
+filename2 = 'hyper2.dat'
+hyper2 = np.fromfile(filename2, dtype='float32')
+hyper2 = hyper2.reshape(n2,n1).T
+
+
+filename3 = 'obser.dat'
+X_test1 = np.fromfile(filename3, dtype='float32')
+X_test1 = X_test1.reshape(n2,n1).T
+
+filename4 = 'obser2.dat'
+X_test2 = np.fromfile(filename4, dtype='float32')
+X_test2 = X_test2.reshape(n2,n1).T
+
+filename5 = 'dither.dat'
+delay = np.fromfile(filename5, dtype='float32')
+
+
+
+########################load the trained model#################################
+
+def snr(y_true, y_pred):
+    return y_pred
+
+model = load_model('../training1/model3.h5',custom_objects={'snr':snr})
+print ('##################################################################################\n')
+print ('#########################Loading model is {}######################################\n'.format(kk))
+print ('##################################################################################\n')
+
+
+
+########################Iterative deblending#################################
+temp1 = X_test1
+temp2 = X_test2
+niter = 4
+snr = np.zeros((niter,1), dtype='float32')
+for i in range(niter):
+    reobser1 = myimtocol(temp1, patch_rows, patch_cols, n1, n2, 4, 4, 1)
+    reobser2 = myimtocol(temp2, patch_rows, patch_cols, n1, n2, 4,4, 1)
+    X1_test = np.concatenate((reobser1,reobser2),axis=0)
+    [test_datasize, patch_rows, patch_cols] = X1_test.shape
+
+    X1_test = X1_test.reshape(test_datasize, patch_rows, patch_cols,1)
+
+    Y1_test = model.predict(X1_test, batch_size=batch_size, verbose=1)
+    Y1_test = np.squeeze(Y1_test)
+    [nn1, nn2, nn3]  = Y1_test.shape
+    d1de1 = myimtocol(Y1_test[0:int(nn1/2),:,:], patch_rows, patch_cols, n1, n2, 4,4, 0)
+    d2de1 = myimtocol(Y1_test[int(nn1/2):nn1,:,:], patch_rows, patch_cols, n1, n2, 4,4, 0)
+    temp1 = X_test1 - dither (d2de1, delay);
+    temp2 = X_test2 - dither (d1de1, -delay);
+    snr[i] = calculate_snr(hyper, d1de1)
+    print ('snr = %.2f'%snr[i])
+
+    plt.figure(dpi=200)
+    plt.subplot(121);plt.imshow(d1de1)
+    plt.title('iteration =%d'%(i+1))
+    plt.subplot(122);plt.imshow(d2de1)
+    plt.title('iteration =%d'%(i+1))
+    plt.show()
+
+
+
+plt.figure()
+plt.plot(snr)
+plt.show()
+
+
+
+
+

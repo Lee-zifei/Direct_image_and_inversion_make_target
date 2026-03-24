@@ -1,0 +1,106 @@
+from rsf.proj import*
+import time
+import random
+
+
+###################### display definition#######################
+def result (data,other):
+    Result (data,
+            '''
+            grey title=%s label1=Time unit1="s" label2=Trace unit2=""
+            color=g screenratio=0.5 wanttitle=n clip=0.01
+            %s
+            '''%(data,other))
+def result3 (data, other):
+    Result (data,
+            '''
+            byte clip=0.01 | grey3 frame1=100 frame2=25 frame3=35
+            title="" label1="Time" unit1="s" label2="X" unit2="km" label3="Y" unit3="km"
+            flat=n wantaxis=y wanttitle=n color=g point1=0.75 point2=0.74 screenratio=1.2
+            %s
+            '''%other)
+def plot (data, other):
+    Plot (data,
+            '''
+            grey title=%s label1=Time unit1="s" label2=Trace unit2=""
+            color=g screenratio=0.5 wanttitle=n clip=0.01
+            %s
+            '''%(data,other))
+def plot3 (data, other):
+    Plot (data,
+            '''
+            byte clip=0.1 | grey3 frame1=100 frame2=25 frame3=35
+            title="" label1="Time" unit1="s" label2="X" unit2="km" label3="Y" unit3="km"
+            flat=n wantaxis=y wanttitle=n color=g point1=0.75 point2=0.74 screenratio=1.5
+            %s
+            '''%other)
+
+###################### display definition#######################
+par = {'nt': 2000, 'nx': 330, 'num': 300}
+
+Flow('vrms', None, 'math d1=0.004 n1=256 o1=0 output="5500"')
+
+# 批量生成超曲面和观测数据
+# abs_list = ['30','29','28','27','26','25','24','23','22','21','20','19','18','17','16','15','14','13','12','11','10','09','08','07','06','05','04', '03','02', '01']
+abs_list = ['05','10']
+# abs_list = ['10']
+hypers, hypers2 = [], []
+obsers1 = {k: [] for k in abs_list}
+obsers2 = {k: [] for k in abs_list}
+
+for i in range(par['num']):
+    base = str(i + 1)
+    synt = f'synt{base}'
+    hyper = f'1hyper{base}'
+    hyper2 = f'2hyper{base}'
+    apex = random.randint(par['nx'] // 5, par['nx'] // 2)
+
+
+    Flow(hyper,'../../../../seismic_data_processing/re_forward/forward_output/%dsource_seismogram.bin'%(i+1),'bin2rsf n1=%d n2=%d'%(par['nt'],par['nx']))
+    Flow(hyper2, hyper, 'matlr')
+    # result(hyper, '')
+    # result(hyper2, '')
+
+    # 构建不同噪声级别的超曲面组合和观测数据
+    for noise in abs_list:
+        scale = int(noise) / 10.0
+        h1 = f'1hyper_{noise}_{base}'
+        h2 = f'2hyper_{noise}_{base}'
+        o1 = f'1observe_{noise}_{base}'
+        o2 = f'2observe_{noise}_{base}'
+        dither = f'dither{base}'
+        inv_dither = f'inv_dither{base}'
+
+        Flow(dither, hyper, 'dithercode amplitude=0.1 period=5 mode=0 range=1200| dd type=int')
+        Flow(inv_dither, dither, 'scale dscale=-1 | dd type=int')
+
+        Flow(h1, [hyper, hyper], f'add scale={scale},{scale} ${{SOURCES[1]}}')
+        Flow(h2, [hyper2, hyper2], f'add scale={scale},{scale} ${{SOURCES[1]}}')
+
+        Flow(o1, [h2, dither, hyper], 'dither shottime=${SOURCES[1]} | add scale=1,1 ${SOURCES[2]}')
+        Flow(o2, [h1, inv_dither, hyper2], 'dither shottime=${SOURCES[1]} | add scale=1,1 ${SOURCES[2]}')
+
+        obsers1[noise].append(o1)
+        obsers2[noise].append(o2)
+
+    hypers.append(hyper)
+    hypers2.append(hyper2)
+
+# 合并三维超曲面与观测数据
+Flow('hyper', hypers, 'cat axis=3 ${SOURCES[1:%d]}' % len(hypers))
+Flow('hyper2', hypers2, 'cat axis=3 ${SOURCES[1:%d]}' % len(hypers2))
+
+
+
+for noise in obsers1:
+    Flow(f'obser_{noise}', obsers1[noise], 'cat axis=3 ${SOURCES[1:%d]}' % len(obsers1[noise]))
+    Flow(f'obser2_{noise}', obsers2[noise], 'cat axis=3 ${SOURCES[1:%d]}' % len(obsers2[noise]))
+    result3(f'obser_{noise}', '')
+    Flow(f'obser_{noise}.dat', f'obser_{noise}', 'rsf2bin')
+    Flow(f'obser2_{noise}.dat', f'obser2_{noise}','rsf2bin')
+    
+Flow('hyper.dat', 'hyper', 'rsf2bin')
+Flow('hyper2.dat', 'hyper2','rsf2bin')
+    
+
+End()

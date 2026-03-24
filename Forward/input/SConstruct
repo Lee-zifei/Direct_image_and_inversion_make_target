@@ -1,0 +1,66 @@
+from rsf.proj import *
+import sys, os, platform
+if 'macos' in platform.platform().lower(): 
+    myprog_path='/Users/zsh/Documents/cdut_zsh_group/python/subfuctions' 
+elif 'linux' in platform.platform().lower(): 
+    myprog_path='/home/zsh/documents/cdut_zsh_group/python/subfuctions' 
+else: 
+    myprog_path='F:linux_backuphomecdut_zsh_grouppythonsubfuctions' 
+sys.path.append(myprog_path)
+from myprog import *  
+  
+  
+  
+  
+###########################################################################################
+def result (data,other):
+    Result (data,
+             '''
+             grey title=%s label1='Time' unit1='s' label2='Trace' unit2=''
+             color=g screenratio=1.5 wanttitle=n pclip=99 bar=y scalebar=n
+             %s 
+             '''%(data,other))
+def plot (data,other):
+    Plot (data,
+             '''
+             grey title=%s label1='Time' unit1='s' label2='Trace' unit2=''
+             color=g screenratio=1.5 wanttitle=n clip=3 bar=y scalebar=n
+             %s 
+             '''%(data,other))
+def result3 (data, other):
+     Result (data,
+            '''
+            byte pclip=99 bar=bar.rsf %s| grey3 frame1=150 frame2=50 frame3=15
+            title='' label1='Time' unit1='s' label2='X' unit2='' label3='Y' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.64 screenratio=1.5
+            '''%(other))
+def plot3 (data, other):
+     Plot (data,
+            '''
+            byte clip=3e+6 bar=bar.rsf %s| grey3 frame1=150 frame2=50 frame3=15
+            title='' label1='Time' unit1='s' label2='X' unit2='' label3='Y' unit3=''
+            flat=n wantaxis=y wanttitle=n color=g point1=0.85 point2=0.64 screenratio=1.5 o1num=0 d1num=2 n1tic=3 
+            '''%(other))
+def wig (data, other):
+    Result (data,
+            '''
+            wiggle title=%s transp=y yreverse=y label1='Time' unit1='s' label2='Trace' unit2=''
+            screenratio=1
+            %s
+            '''%(data, other))
+def graph (data, other):
+    Result (data,
+            '''
+            graph title=%s label1='Frequency' unit1='Hz' label2='Amplitude' unit2='' screenratio=0.5
+            %s
+            '''%(data, other))
+###########################################################################################
+
+Flow ('top', './acc_vp.bin', 'bin2rsf n1=257 n2=767|window n1=1|spray axis=2 n=13 |transp')
+Flow ('marmousi_257_767', './acc_vp.bin', 'bin2rsf n1=257 n2=767')
+Flow ('marmousi_270_767', 'top marmousi_257_767', 'cat axis=1 space=n ${SOURCES[1]}')
+Flow ('marmousi_270_767.dat', 'marmousi_270_767', 'rsf2bin')
+#
+
+
+End ()

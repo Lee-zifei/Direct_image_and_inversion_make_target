@@ -1,0 +1,56 @@
+4.2-git	sfbin2rsf	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:32:31 2026
+
+	o1=0
+	d2=1
+	n2=330
+	o2=0
+	data_format="native_float"
+	esize=4
+	in="stdout"
+	d1=0.004
+	n1=2000
+	in="stdin"
+
+4.2-git	sfput	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:32:31 2026
+
+	data_format="native_float"
+	in="/media/lzf/Work/data/RSFDATA/data/direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process/csg1.rsf@"
+	d1=0.001000
+	d2=20
+	o2=0
+4.2-git	sfadd	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:32:58 2026
+
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Work/data/RSFDATA/data/direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process/csg_ble1.rsf@"
+4.2-git	sfcat	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:33:23 2026
+
+	n2=108900
+	data_format="native_float"
+	esize=4
+	in="/media/lzf/Work/data/RSFDATA/data/direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process/csgs_ble.rsf@"
+4.2-git	sfintbin4	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:33:37 2026
+
+	d2=20
+	n2=330
+	d3=20
+	o2=0
+	n3=330
+	data_format="native_float"
+	d4=1
+	o3=0
+	n4=1
+	d5=1
+	o4=1
+	n5=1
+	o5=1
+	esize=4
+	in="/media/lzf/Work/data/RSFDATA/data/direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process/3ddata_ble.rsf@"
+4.2-git	sfbyte	direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process:	lzf@lzf	Tue Mar 24 14:33:40 2026
+
+	n2=1
+	n3=330
+	data_format="native_uchar"
+	esize=1
+	in="/media/lzf/Work/data/RSFDATA/data/direct_image_and_inversion_make_target/seismic_data_processing/blend_and_process/bar.rsf@"
+	n1=264

@@ -1,0 +1,23 @@
+{
+    "os": "Linux-6.8.0-52-generic-x86_64-with-debian-bookworm-sid",
+    "python": "3.6.13",
+    "heartbeatAt": "2025-04-29T08:19:58.117705",
+    "startedAt": "2025-04-29T08:19:54.871347",
+    "docker": null,
+    "gpu": "Quadro GP100",
+    "gpu_count": 9,
+    "cpu_count": 112,
+    "cuda": null,
+    "args": [
+        "--cfg",
+        "./configs/WUDTnet_cosl.yaml",
+        "--batch-size",
+        "16"
+    ],
+    "state": "running",
+    "program": "main_training.py",
+    "codePath": "main_training.py",
+    "host": "zsh",
+    "username": "lzf",
+    "executable": "/home/lzf/.conda/envs/WUDT/bin/python"
+}

@@ -1,0 +1,26 @@
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_setup.py:_flush():76] Configure stats pid to 2937716
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_setup.py:_flush():76] Loading settings from /home/lzf/.config/wandb/settings
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_setup.py:_flush():76] Loading settings from /data/data1/lzf/code/python/2025_work/cosl_deblending/wandb/settings
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'_require_service': 'True', 'api_key': '***REDACTED***', 'mode': 'online'}
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'main_training.py', 'program': 'main_training.py'}
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_init.py:_log_setup():461] Logging user logs to /data/data1/lzf/code/python/2025_work/cosl_deblending/wandb/run-20250429_161834-ttekc13v/logs/debug.log
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_init.py:_log_setup():462] Logging internal logs to /data/data1/lzf/code/python/2025_work/cosl_deblending/wandb/run-20250429_161834-ttekc13v/logs/debug-internal.log
+2025-04-29 16:18:34,020 INFO    MainThread:2937716 [wandb_init.py:init():495] calling init triggers
+2025-04-29 16:18:34,021 INFO    MainThread:2937716 [wandb_init.py:init():499] wandb.init called with sweep_config: {}
+config: {}
+2025-04-29 16:18:34,021 INFO    MainThread:2937716 [wandb_init.py:init():548] starting backend
+2025-04-29 16:18:34,021 INFO    MainThread:2937716 [wandb_init.py:init():552] setting up manager
+2025-04-29 16:18:34,028 INFO    MainThread:2937716 [backend.py:_multiprocessing_setup():99] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2025-04-29 16:18:34,030 INFO    MainThread:2937716 [wandb_init.py:init():558] backend started and connected
+2025-04-29 16:18:34,034 INFO    MainThread:2937716 [wandb_init.py:init():636] updated telemetry
+2025-04-29 16:18:34,034 INFO    MainThread:2937716 [wandb_init.py:init():668] communicating run to backend with 30 second timeout
+2025-04-29 16:18:36,016 INFO    MainThread:2937716 [wandb_run.py:_on_init():1981] communicating current version
+2025-04-29 16:18:38,959 INFO    MainThread:2937716 [wandb_run.py:_on_init():1985] got version response upgrade_message: "wandb version 0.19.10 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2025-04-29 16:18:38,959 INFO    MainThread:2937716 [wandb_init.py:init():700] starting run threads in backend
+2025-04-29 16:18:41,077 INFO    MainThread:2937716 [wandb_run.py:_console_start():1961] atexit reg
+2025-04-29 16:18:41,077 INFO    MainThread:2937716 [wandb_run.py:_redirect():1819] redirect: SettingsConsole.WRAP_RAW
+2025-04-29 16:18:41,078 INFO    MainThread:2937716 [wandb_run.py:_redirect():1884] Wrapping output streams.
+2025-04-29 16:18:41,078 INFO    MainThread:2937716 [wandb_run.py:_redirect():1906] Redirects installed.
+2025-04-29 16:18:41,079 INFO    MainThread:2937716 [wandb_init.py:init():732] run started, returning control to user process
+2025-04-29 16:19:07,307 WARNING MsgRouterThr:2937716 [router.py:message_loop():76] message_loop has been closed
